@@ -1,59 +1,48 @@
 import styles from './styles.module.scss'
 
+import { api } from '../..'
+
 import logoImg from '../../assets/logo.svg'
+import { useEffect, useState } from 'react'
 
-export const MessageList = () => (
-  <>
-    <div className={styles.messageListWrapper}>
-      <img src={logoImg} alt="DoWhile 2021" />
+type Message = {
+  id: string
+  text: string
+  user: {
+    avatar_url: string
+    name: string
+  }
+}
 
-      <ul className={styles.messageList}>
-        <li className={styles.message}>
-          <p className={styles.messageContent}>
-            Mensagem 1 bla bla bla eu eu eu bla bla bla eu eu eu
-          </p>
+export const MessageList = () => {
+  const [messages, setMessages] = useState<Message[]>([])
 
-          <div className={styles.messageUser}>
-            <div className={styles.userImage}>
-              <img
-                src="https://github.com/hakuunabatata.png"
-                alt="Sandro Plankton"
-              />
-            </div>
-            <span>Sandro Plankton</span>
-          </div>
-        </li>
-        <li className={styles.message}>
-          <p className={styles.messageContent}>
-            Mensagem 1 bla bla bla eu eu eu bla bla bla eu eu eu
-          </p>
+  useEffect(() => {
+    api
+      .get<Message[]>('messages/last3')
+      .then(({ data: msgs }) => setMessages(msgs))
+  }, [])
 
-          <div className={styles.messageUser}>
-            <div className={styles.userImage}>
-              <img
-                src="https://github.com/hakuunabatata.png"
-                alt="Sandro Plankton"
-              />
-            </div>
-            <span>Sandro Plankton</span>
-          </div>
-        </li>
-        <li className={styles.message}>
-          <p className={styles.messageContent}>
-            Mensagem 1 bla bla bla eu eu eu bla bla bla eu eu eu
-          </p>
+  return (
+    <>
+      <div className={styles.messageListWrapper}>
+        <img src={logoImg} alt="DoWhile 2021" />
 
-          <div className={styles.messageUser}>
-            <div className={styles.userImage}>
-              <img
-                src="https://github.com/hakuunabatata.png"
-                alt="Sandro Plankton"
-              />
-            </div>
-            <span>Sandro Plankton</span>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </>
-)
+        <ul className={styles.messageList}>
+          {messages.map(({ user, text, id }) => (
+            <li key={id} className={styles.message}>
+              <p className={styles.messageContent}>{text}</p>
+
+              <div className={styles.messageUser}>
+                <div className={styles.userImage}>
+                  <img src={user.avatar_url} alt={user.name} />
+                </div>
+                <span>{user.name}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  )
+}
