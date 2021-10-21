@@ -44,6 +44,8 @@ export const AuthProvider = (props: AuthProvider) => {
 
     localStorage.setItem('@dowhile:token', token)
 
+    api.defaults.headers.common.authorization = `Bearer ${token}`
+
     setUser(user)
   }
 
@@ -56,15 +58,11 @@ export const AuthProvider = (props: AuthProvider) => {
     const token = localStorage.getItem('@dowhile:token')
 
     if (token) {
-      api
-        .get<User>('profile', {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        })
-        .then(({ data }) => {
-          setUser(data)
-        })
+      api.defaults.headers.common.authorization = `Bearer ${token}`
+
+      api.get<User>('profile').then(({ data }) => {
+        setUser(data)
+      })
     }
   }, [])
 
