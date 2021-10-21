@@ -1,5 +1,5 @@
 import styles from './styles.module.scss'
-
+import io from 'socket.io-client'
 import { api } from '../..'
 
 import logoImg from '../../assets/logo.svg'
@@ -14,6 +14,14 @@ type Message = {
   }
 }
 
+const messagesQueue: Message[] = []
+
+const socket = io('http://localhost:4000')
+
+socket.on('new_message', (newMessage: Message) => {
+  messagesQueue.push(newMessage)
+})
+
 export const MessageList = () => {
   const [messages, setMessages] = useState<Message[]>([])
 
@@ -21,6 +29,17 @@ export const MessageList = () => {
     api
       .get<Message[]>('messages/last3')
       .then(({ data: msgs }) => setMessages(msgs))
+  }, [])
+
+  useEffect(() => {
+    setInterval(() => {
+      if (messagesQueue.length > 0) {
+        setMessages((prevState) =>
+          [messagesQueue[0], prevState[0], prevState[1]].filter(Boolean)
+        )
+        messagesQueue.shift()
+      }
+    }, 3000)
   }, [])
 
   return (
